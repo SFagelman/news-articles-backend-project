@@ -10,7 +10,7 @@ exports.selectArticleById = (articleId) => {
     .then((article) => {
       if (article.rows.length === 0) {
         return Promise.reject({
-          status: 400,
+          status: 404,
           msg: "Article does not exist",
         });
       } else {

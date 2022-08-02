@@ -63,18 +63,18 @@ describe("GET /api/articles/:article_id", () => {
         );
       });
   });
-  test("status:400, gives correct error message when given valid but nonexistent article id", () => {
+  test("status:404, gives correct error message when given valid but nonexistent article id", () => {
     return request(app)
       .get("/api/articles/9999")
-      .expect(400)
+      .expect(404)
       .then((response) => {
         expect(response.body.msg).toBe("Article does not exist");
       });
   });
-  test("status:404, gives correct error message when given invalid article id", () => {
+  test("status:400, gives correct error message when given invalid article id", () => {
     return request(app)
       .get("/api/articles/fish")
-      .expect(404)
+      .expect(400)
       .then((response) => {
         expect(response.body.msg).toBe("Invalid Request");
       });
