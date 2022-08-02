@@ -36,3 +36,7 @@ exports.updateArticleById = (articleId, newVotes) => {
       }
     });
 };
+
+exports.selectUsers = () => {
+  return db.query("SELECT * FROM users;").then((users) => users.rows);
+};
