@@ -11,7 +11,7 @@ afterAll(() => {
 });
 
 describe("ALL - invalid routes", () => {
-  test("status 404: responds with appropriate error when incorrect route", () => {
+  test("status:404, responds with appropriate error when incorrect route", () => {
     return request(app)
       .get("/api/toppicks")
       .expect(404)
@@ -43,7 +43,7 @@ describe("GET /api/topics", () => {
 });
 
 describe("GET /api/articles/:article_id", () => {
-  test("status 200: should return an article object with correct properties", () => {
+  test("status:200, should return an article object with correct properties", () => {
     return request(app)
       .get("/api/articles/1")
       .expect(200)
@@ -74,6 +74,47 @@ describe("GET /api/articles/:article_id", () => {
   test("status:400, gives correct error message when given invalid article id", () => {
     return request(app)
       .get("/api/articles/fish")
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe("Invalid Request");
+      });
+  });
+});
+
+describe("PATCH /api/articles/:article_id", () => {
+  test("status:200, updates correct article and returns updated object, for incrementing vote", () => {
+    const articleUpdate1 = {
+      inc_votes: 10,
+    };
+    return request(app)
+      .patch("/api/articles/1")
+      .send(articleUpdate1)
+      .expect(200)
+      .then(({ body }) => {
+        const { article } = body;
+        expect(article).toBeInstanceOf(Object);
+        expect(article.votes).toEqual(110);
+      });
+  });
+  test("status:200, updates correct article and returns updated object, for decrementing vote", () => {
+    const articleUpdate = {
+      inc_votes: -50,
+    };
+    return request(app)
+      .patch("/api/articles/2")
+      .send(articleUpdate)
+      .expect(200)
+      .then(({ body }) => {
+        const { article } = body;
+        expect(article).toBeInstanceOf(Object);
+        expect(article.votes).toEqual(-50);
+      });
+  });
+  test("status:400, gives correct error message when given invalid votes increment", () => {
+    const articleUpdate = { inc_votes: "fish" };
+    return request(app)
+      .patch("/api/articles/1")
+      .send(articleUpdate)
       .expect(400)
       .then((response) => {
         expect(response.body.msg).toBe("Invalid Request");
