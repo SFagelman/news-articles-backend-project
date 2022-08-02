@@ -2,7 +2,10 @@ const db = require("../db/connection.js");
 
 exports.selectArticleById = (articleId) => {
   return db
-    .query("SELECT * FROM articles WHERE article_id = $1;", [articleId])
+    .query(
+      'SELECT articles.*, COUNT(comment_id)::int AS "comment_count" FROM articles JOIN comments ON comments.article_id = articles.article_id WHERE articles.article_id = $1 GROUP BY articles.article_id;',
+      [articleId]
+    )
     .then((article) => {
       if (article.rows.length === 0) {
         return Promise.reject({
