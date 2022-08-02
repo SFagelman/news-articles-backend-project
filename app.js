@@ -3,10 +3,13 @@ const {
   getTopics,
   getArticleById,
   patchArticleById,
+  getUsers,
 } = require("./controllers/topics.controllers");
 
 const app = express();
 app.use(express.json());
+
+app.get("/api/users", getUsers);
 
 app.get("/api/topics", getTopics);
 

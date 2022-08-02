@@ -2,6 +2,7 @@ const {
   selectTopics,
   selectArticleById,
   updateArticleById,
+  selectUsers,
 } = require("../models/topics.models");
 
 exports.getTopics = (req, res, next) => {
@@ -22,5 +23,11 @@ exports.patchArticleById = (req, res, next) => {
   const newVotes = req.body.inc_votes;
   updateArticleById(articleId, newVotes)
     .then((article) => res.status(200).send({ article }))
+    .catch(next);
+};
+
+exports.getUsers = (req, res, next) => {
+  selectUsers()
+    .then((users) => res.status(200).send({ users }))
     .catch(next);
 };
