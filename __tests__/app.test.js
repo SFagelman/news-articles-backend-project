@@ -30,6 +30,7 @@ describe("GET /api/topics", () => {
       .then(({ body }) => {
         const { topics } = body;
         expect(topics).toBeInstanceOf(Array);
+        expect(topics.length).toBeGreaterThan(0);
         topics.forEach((topic) => {
           expect(topic).toEqual(
             expect.objectContaining({
@@ -130,6 +131,7 @@ describe("GET /api/users", () => {
       .then(({ body }) => {
         const { users } = body;
         expect(users).toBeInstanceOf(Array);
+        expect(users.length).toBeGreaterThan(0);
         users.forEach((user) => {
           expect(user).toEqual(
             expect.objectContaining({
