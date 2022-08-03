@@ -35,7 +35,7 @@ describe("ALL - invalid routes", () => {
 ///////////////////////////////////////////
 
 describe("GET /api/topics", () => {
-  test("status:200, responds with an array of topics", () => {
+  test("status:200, responds with an array of topics objects", () => {
     return request(app)
       .get("/api/topics")
       .expect(200)
@@ -60,6 +60,47 @@ describe("GET /api/topics", () => {
 //ARTICLES tests
 
 ///////////////////////////////////////////
+
+describe("GET /api/articles", () => {
+  test("status:200, responds with an array of articles objects", () => {
+    return request(app)
+      .get("/api/articles")
+      .expect(200)
+      .then(({ body }) => {
+        const { articles } = body;
+        expect(articles).toBeInstanceOf(Array);
+        expect(articles.length).toBeGreaterThan(0);
+        expect(articles).toBeSortedBy("created_at", {
+          descending: true,
+          coerce: true,
+        });
+        articles.forEach((article) => {
+          expect(article).toEqual(
+            expect.objectContaining({
+              author: expect.any(String),
+              title: expect.any(String),
+              article_id: expect.any(Number),
+              body: expect.any(String),
+              topic: expect.any(String),
+              created_at: expect.any(String),
+              votes: expect.any(Number),
+              comment_count: expect.any(Number),
+            })
+          );
+        });
+        expect(articles[0]).toEqual({
+          article_id: 3,
+          title: "Eight pug gifs that remind me of mitch",
+          topic: "mitch",
+          author: "icellusedkars",
+          body: "some gifs",
+          created_at: "2020-11-03T09:12:00.000Z",
+          votes: 0,
+          comment_count: 2,
+        });
+      });
+  });
+});
 
 describe("GET /api/articles/:article_id", () => {
   test("status:200, should return an article object with correct properties", () => {
@@ -160,7 +201,7 @@ describe("PATCH /api/articles/:article_id", () => {
 ///////////////////////////////////////////
 
 describe("GET /api/users", () => {
-  test("status:200, responds with an array of users", () => {
+  test("status:200, responds with an array of users objects", () => {
     return request(app)
       .get("/api/users")
       .expect(200)
