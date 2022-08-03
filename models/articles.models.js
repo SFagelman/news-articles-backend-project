@@ -1,4 +1,5 @@
 const db = require("../db/connection.js");
+const { checkExists } = require("../db/seeds/utils");
 
 exports.selectArticles = () => {
   return db
@@ -40,6 +41,26 @@ exports.updateArticleById = (articleId, newVotes) => {
         });
       } else {
         return article.rows[0];
+      }
+    });
+};
+
+exports.selectCommentsByArticleId = (articleId) => {
+  return checkExists("comments", "comments.article_id", articleId)
+    .then(() => {
+      return db.query(
+        "SELECT comments.comment_id, comments.votes, comments.created_at, comments.author, comments.body FROM comments JOIN articles ON comments.article_id = articles.article_id WHERE articles.article_id = $1",
+        [articleId]
+      );
+    })
+    .then((comments) => {
+      if (comments.rows.length === 0) {
+        return Promise.reject({
+          status: 404,
+          msg: "Article does not exist",
+        });
+      } else {
+        return comments.rows;
       }
     });
 };

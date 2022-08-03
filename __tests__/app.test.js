@@ -194,6 +194,46 @@ describe("PATCH /api/articles/:article_id", () => {
   });
 });
 
+describe("GET /api/articles/:article_id/comments", () => {
+  test("status:200, responds with an array of comments objects", () => {
+    return request(app)
+      .get("/api/articles/9/comments")
+      .expect(200)
+      .then(({ body }) => {
+        const { comments } = body;
+        expect(comments).toBeInstanceOf(Array);
+        expect(comments.length).toBeGreaterThan(0);
+        comments.forEach((comment) => {
+          expect(comment).toEqual(
+            expect.objectContaining({
+              comment_id: expect.any(Number),
+              votes: expect.any(Number),
+              created_at: expect.any(String),
+              author: expect.any(String),
+              body: expect.any(String),
+            })
+          );
+        });
+      });
+  });
+  test("status:404, responds with correct error when no comments exist for supplied article_id", () => {
+    return request(app)
+      .get("/api/articles/4/comments")
+      .expect(404)
+      .then((response) => {
+        expect(response.body.msg).toBe("Resource not found");
+      });
+  });
+  test("status:400, gives correct error message when given invalid article id", () => {
+    return request(app)
+      .get("/api/articles/fish")
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe("Invalid Request");
+      });
+  });
+});
+
 ///////////////////////////////////////////
 
 //USERS tests
