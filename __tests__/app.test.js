@@ -88,6 +88,16 @@ describe("GET /api/articles", () => {
             })
           );
         });
+        expect(articles[0]).toEqual({
+          article_id: 3,
+          title: "Eight pug gifs that remind me of mitch",
+          topic: "mitch",
+          author: "icellusedkars",
+          body: "some gifs",
+          created_at: "2020-11-03T09:12:00.000Z",
+          votes: 0,
+          comment_count: 2,
+        });
       });
   });
 });
