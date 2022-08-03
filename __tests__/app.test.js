@@ -10,6 +10,12 @@ afterAll(() => {
   if (db.end) db.end();
 });
 
+///////////////////////////////////////////
+
+//GLOBAL tests
+
+///////////////////////////////////////////
+
 describe("ALL - invalid routes", () => {
   test("status:404, responds with appropriate error when incorrect route", () => {
     return request(app)
@@ -21,6 +27,12 @@ describe("ALL - invalid routes", () => {
       });
   });
 });
+
+///////////////////////////////////////////
+
+//TOPICS tests
+
+///////////////////////////////////////////
 
 describe("GET /api/topics", () => {
   test("status:200, responds with an array of topics", () => {
@@ -42,6 +54,12 @@ describe("GET /api/topics", () => {
       });
   });
 });
+
+///////////////////////////////////////////
+
+//ARTICLES tests
+
+///////////////////////////////////////////
 
 describe("GET /api/articles/:article_id", () => {
   test("status:200, should return an article object with correct properties", () => {
@@ -78,6 +96,18 @@ describe("GET /api/articles/:article_id", () => {
       .expect(400)
       .then((response) => {
         expect(response.body.msg).toBe("Invalid Request");
+      });
+  });
+});
+
+describe("GET /api/articles/:article_id (comment count)", () => {
+  test("status:200, should return an article object with comment_count property", () => {
+    return request(app)
+      .get("/api/articles/1")
+      .expect(200)
+      .then(({ body }) => {
+        const { article } = body;
+        expect(article.comment_count).toEqual(11);
       });
   });
 });
@@ -122,6 +152,12 @@ describe("PATCH /api/articles/:article_id", () => {
       });
   });
 });
+
+///////////////////////////////////////////
+
+//USERS tests
+
+///////////////////////////////////////////
 
 describe("GET /api/users", () => {
   test("status:200, responds with an array of users", () => {
