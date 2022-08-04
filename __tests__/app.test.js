@@ -321,6 +321,19 @@ describe("POST /api/articles/:article_id/comments", () => {
         expect(response.body.msg).toBe("Invalid post body keys");
       });
   });
+  test("status:400, gives correct error when body passed contains mis-spelled properties", () => {
+    const commentUpdate = {
+      userame: "butter_bridge",
+      body: "test comment",
+    };
+    return request(app)
+      .post("/api/articles/1/comments")
+      .send(commentUpdate)
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe("Invalid post body keys");
+      });
+  });
   test("status:400, gives correct error when body passed does not contain correct properties", () => {
     const commentUpdate = {
       username: "butter_bridge",

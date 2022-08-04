@@ -26,13 +26,9 @@ exports.formatComments = (comments, idLookup) => {
 
 exports.checkExists = (table, column, value) => {
   const queryStr = format("SELECT * FROM %s WHERE %s = $1;", table, column);
-  // checks if article_id
   return db.query(queryStr, [value]).then((dbOutput) => {
     if (dbOutput.rows.length === 0) {
       return Promise.reject({ status: 404, msg: `${column} not found` });
     }
   });
 };
-
-//remove article does not exist, replace with 200, empty array
-//change previous models/tests for 200 etc
