@@ -128,7 +128,7 @@ describe("GET /api/articles/:article_id", () => {
       .get("/api/articles/9999")
       .expect(404)
       .then((response) => {
-        expect(response.body.msg).toBe("Article does not exist");
+        expect(response.body.msg).toBe("article_id not found");
       });
   });
   test("status:400, gives correct error message when given invalid article id", () => {
@@ -192,6 +192,19 @@ describe("PATCH /api/articles/:article_id", () => {
         expect(response.body.msg).toBe("Invalid Request");
       });
   });
+
+  test("status:404, gives correct error message when given valid but nonexistent article id", () => {
+    const articleUpdate = {
+      inc_votes: -50,
+    };
+    return request(app)
+      .patch("/api/articles/9999")
+      .send(articleUpdate)
+      .expect(404)
+      .then((response) => {
+        expect(response.body.msg).toBe("article_id not found");
+      });
+  });
 });
 
 describe("GET /api/articles/:article_id/comments", () => {
@@ -216,20 +229,109 @@ describe("GET /api/articles/:article_id/comments", () => {
         });
       });
   });
-  test("status:404, responds with correct error when no comments exist for supplied article_id", () => {
+
+  test("status:200, responds with empty array when no comments exist for supplied article_id", () => {
     return request(app)
       .get("/api/articles/4/comments")
-      .expect(404)
-      .then((response) => {
-        expect(response.body.msg).toBe("Resource not found");
+      .expect(200)
+      .then(({ body }) => {
+        const { comments } = body;
+        expect(comments).toBeInstanceOf(Array);
+        expect(comments.length).toEqual(0);
+        expect(comments).toEqual([]);
       });
   });
+
+  test("status:404, gives correct error message when given valid but nonexistent article id", () => {
+    return request(app)
+      .get("/api/articles/9999/comments")
+      .expect(404)
+      .then((response) => {
+        expect(response.body.msg).toBe("article_id not found");
+      });
+  });
+
   test("status:400, gives correct error message when given invalid article id", () => {
     return request(app)
-      .get("/api/articles/fish")
+      .get("/api/articles/fish/comments")
       .expect(400)
       .then((response) => {
         expect(response.body.msg).toBe("Invalid Request");
+      });
+  });
+});
+
+describe("POST /api/articles/:article_id/comments", () => {
+  test("status:201, adds new comment and returns added comment", () => {
+    const commentUpdate = {
+      username: "butter_bridge",
+      body: "This is a test comment. Please ignore",
+    };
+    return request(app)
+      .post("/api/articles/1/comments")
+      .send(commentUpdate)
+      .expect(201)
+      .then(({ body }) => {
+        const { comment } = body;
+        expect(comment).toEqual({
+          comment_id: 19,
+          body: "This is a test comment. Please ignore",
+          article_id: 1,
+          author: "butter_bridge",
+          created_at: expect.any(String),
+          votes: 0,
+        });
+      });
+  });
+  test("status:400, gives correct error message when given invalid article id", () => {
+    const commentUpdate = {
+      username: "butter_bridge",
+      body: "This is a test comment. Please ignore",
+    };
+    return request(app)
+      .post("/api/articles/fish/comments")
+      .send(commentUpdate)
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe("Invalid Request");
+      });
+  });
+  test("status:404, gives correct error message when given valid but nonexistent article id", () => {
+    const commentUpdate = {
+      username: "butter_bridge",
+      body: "This is a test comment. Please ignore",
+    };
+    return request(app)
+      .post("/api/articles/9999/comments")
+      .send(commentUpdate)
+      .expect(404)
+      .then((response) => {
+        expect(response.body.msg).toBe("article_id not found");
+      });
+  });
+  test("status:400, gives correct error when body passed does not contain correct properties", () => {
+    const commentUpdate = {
+      username: "butter_bridge",
+    };
+    return request(app)
+      .post("/api/articles/1/comments")
+      .send(commentUpdate)
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe("Invalid post body keys");
+      });
+  });
+  test("status:400, gives correct error when body passed does not contain correct properties", () => {
+    const commentUpdate = {
+      username: "butter_bridge",
+      body: 5,
+    };
+    return request(app)
+      .post("/api/articles/1/comments")
+      .send(commentUpdate)
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe("Invalid post body values");
       });
   });
 });

@@ -3,6 +3,7 @@ const {
   selectArticleById,
   updateArticleById,
   selectCommentsByArticleId,
+  newCommentByArticleId,
 } = require("../models/articles.models");
 
 exports.getArticles = (req, res, next) => {
@@ -30,5 +31,28 @@ exports.getCommentsByArticleId = (req, res, next) => {
   const articleId = req.params.article_id;
   selectCommentsByArticleId(articleId)
     .then((comments) => res.status(200).send({ comments }))
+    .catch(next);
+};
+
+exports.postCommentByArticleId = (req, res, next) => {
+  const articleId = req.params.article_id;
+  const newCommentUsername = req.body.username;
+  const newCommentBody = req.body.body;
+  if (
+    !req.body.hasOwnProperty("username") ||
+    !req.body.hasOwnProperty("body")
+  ) {
+    res.status(400).send({ msg: "Invalid post body keys" });
+  }
+
+  if (
+    typeof newCommentUsername !== "string" ||
+    typeof newCommentBody !== "string"
+  ) {
+    res.status(400).send({ msg: "Invalid post body values" });
+  }
+
+  newCommentByArticleId(articleId, newCommentUsername, newCommentBody)
+    .then((comment) => res.status(201).send({ comment }))
     .catch(next);
 };
