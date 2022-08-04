@@ -1,3 +1,4 @@
+const { checkout } = require("../app.js");
 const db = require("../db/connection.js");
 const { checkExists } = require("../db/seeds/utils");
 
@@ -10,43 +11,33 @@ exports.selectArticles = () => {
 };
 
 exports.selectArticleById = (articleId) => {
-  return db
-    .query(
-      'SELECT articles.*, COUNT(comment_id)::int AS "comment_count" FROM articles JOIN comments ON comments.article_id = articles.article_id WHERE articles.article_id = $1 GROUP BY articles.article_id;',
-      [articleId]
-    )
-    .then((article) => {
-      if (article.rows.length === 0) {
-        return Promise.reject({
-          status: 404,
-          msg: "Article does not exist",
-        });
-      } else {
+  return checkExists("articles", "article_id", articleId).then(() => {
+    return db
+      .query(
+        'SELECT articles.*, COUNT(comment_id)::int AS "comment_count" FROM articles JOIN comments ON comments.article_id = articles.article_id WHERE articles.article_id = $1 GROUP BY articles.article_id;',
+        [articleId]
+      )
+      .then((article) => {
         return article.rows[0];
-      }
-    });
+      });
+  });
 };
 
 exports.updateArticleById = (articleId, newVotes) => {
-  return db
-    .query(
-      "UPDATE articles SET votes = votes + $1 WHERE article_id = $2 RETURNING *;",
-      [newVotes, articleId]
-    )
-    .then((article) => {
-      if (article.rows.length === 0) {
-        return Promise.reject({
-          status: 404,
-          msg: "Article does not exist",
-        });
-      } else {
+  return checkExists("articles", "article_id", articleId).then(() => {
+    return db
+      .query(
+        "UPDATE articles SET votes = votes + $1 WHERE article_id = $2 RETURNING *;",
+        [newVotes, articleId]
+      )
+      .then((article) => {
         return article.rows[0];
-      }
-    });
+      });
+  });
 };
 
 exports.selectCommentsByArticleId = (articleId) => {
-  return checkExists("comments", "comments.article_id", articleId)
+  return checkExists("articles", "article_id", articleId)
     .then(() => {
       return db.query(
         "SELECT comments.comment_id, comments.votes, comments.created_at, comments.author, comments.body FROM comments JOIN articles ON comments.article_id = articles.article_id WHERE articles.article_id = $1",
@@ -54,13 +45,23 @@ exports.selectCommentsByArticleId = (articleId) => {
       );
     })
     .then((comments) => {
-      if (comments.rows.length === 0) {
-        return Promise.reject({
-          status: 404,
-          msg: "Article does not exist",
-        });
-      } else {
-        return comments.rows;
-      }
+      return comments.rows;
     });
+};
+
+exports.newCommentByArticleId = (
+  articleId,
+  newCommentUsername,
+  newCommentBody
+) => {
+  return checkExists("articles", "article_id", articleId).then(() => {
+    return db
+      .query(
+        "INSERT INTO comments (body, article_id, author) VALUES ($1, $2, $3) RETURNING *;",
+        [newCommentBody, articleId, newCommentUsername]
+      )
+      .then((article) => {
+        return article.rows[0];
+      });
+  });
 };
