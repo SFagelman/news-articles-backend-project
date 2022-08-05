@@ -275,6 +275,14 @@ describe("GET /api/articles (queries)", () => {
         expect(response.body.msg).toBe("Bad Request");
       });
   });
+  test("status:400, gives correct error when order query is mis-spelled", () => {
+    return request(app)
+      .get("/api/articles?orde=ASC")
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe("Bad Request");
+      });
+  });
   test("status:400, gives correct error when filter query is mis-spelled", () => {
     return request(app)
       .get("/api/articles?topi=mitch")
