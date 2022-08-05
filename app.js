@@ -11,12 +11,16 @@ const {
 
 const { getUsers } = require("./controllers/users.controllers");
 
+const { deleteCommentById } = require("./controllers/comments.controllers");
+
 const app = express();
 app.use(express.json());
 
 app.get("/api/users", getUsers);
 
 app.get("/api/topics", getTopics);
+
+app.delete("/api/comments/:comment_id", deleteCommentById);
 
 app.get("/api/articles", getArticles);
 app.get("/api/articles/:article_id", getArticleById);

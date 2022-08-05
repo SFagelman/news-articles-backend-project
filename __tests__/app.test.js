@@ -567,3 +567,31 @@ describe("GET /api/users", () => {
       });
   });
 });
+
+///////////////////////////////////////////
+
+//COMMENTS tests
+
+///////////////////////////////////////////
+
+describe.only("DELETE /api/comments/:comment_id", () => {
+  test("status:204, should return no content", () => {
+    return request(app).delete("/api/comments/1").expect(204);
+  });
+  test("status:404, should return correct error when supplied valid but nonexistent comment_id", () => {
+    return request(app)
+      .delete("/api/comments/9999")
+      .expect(404)
+      .then((response) => {
+        expect(response.body.msg).toBe("comment_id not found");
+      });
+  });
+  test("status:400, should return correct error when invalid comment_id", () => {
+    return request(app)
+      .delete("/api/comments/fish")
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe("Invalid Request");
+      });
+  });
+});

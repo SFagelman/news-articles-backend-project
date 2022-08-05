@@ -1,4 +1,3 @@
-const { checkout } = require("../app.js");
 const format = require("pg-format");
 const db = require("../db/connection.js");
 const { checkExists } = require("../db/seeds/utils");
