@@ -7,7 +7,19 @@ const {
 } = require("../models/articles.models");
 
 exports.getArticles = (req, res, next) => {
-  selectArticles()
+  const sortBy = req.query.sort_by;
+  const order = req.query.order;
+  const topicFilter = req.query.topic;
+
+  const validQueries = ["sort_by", "order", "topic"];
+  if (Object.keys(req.query).length != 0) {
+    for (query in req.query) {
+      if (!validQueries.includes(query)) {
+        res.status(400).send({ msg: "Bad Request" });
+      }
+    }
+  }
+  selectArticles(sortBy, order, topicFilter)
     .then((articles) => res.status(200).send({ articles }))
     .catch(next);
 };
