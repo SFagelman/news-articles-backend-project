@@ -1,6 +1,8 @@
-const express = require("express");
+// const express = require("express");
 
-const app = express();
+// const app = express();
+
+const app = require("./app");
 
 const { PORT = 9090 } = process.env;
 
