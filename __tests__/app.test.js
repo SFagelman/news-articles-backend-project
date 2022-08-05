@@ -574,7 +574,7 @@ describe("GET /api/users", () => {
 
 ///////////////////////////////////////////
 
-describe.only("DELETE /api/comments/:comment_id", () => {
+describe("DELETE /api/comments/:comment_id", () => {
   test("status:204, should return no content", () => {
     return request(app).delete("/api/comments/1").expect(204);
   });
