@@ -102,6 +102,197 @@ describe("GET /api/articles", () => {
   });
 });
 
+describe("GET /api/articles (queries)", () => {
+  test("status:200, should return array of articles objects with correct properties", () => {
+    return request(app)
+      .get("/api/articles?sort_by=title")
+      .expect(200)
+      .then(({ body }) => {
+        const { articles } = body;
+        expect(articles).toBeInstanceOf(Array);
+        expect(articles.length).toBeGreaterThan(0);
+        articles.forEach((article) => {
+          expect(article).toEqual(
+            expect.objectContaining({
+              author: expect.any(String),
+              title: expect.any(String),
+              article_id: expect.any(Number),
+              body: expect.any(String),
+              topic: expect.any(String),
+              created_at: expect.any(String),
+              votes: expect.any(Number),
+              comment_count: expect.any(Number),
+            })
+          );
+        });
+      });
+  });
+  test("status:200, responds with array of articles objects, sorted by specified column", () => {
+    return request(app)
+      .get("/api/articles?sort_by=title")
+      .expect(200)
+      .then(({ body }) => {
+        const { articles } = body;
+        expect(articles).toBeInstanceOf(Array);
+        expect(articles.length).toBeGreaterThan(0);
+        expect(articles).toBeSortedBy("title", {
+          descending: true,
+        });
+        expect(articles[0]).toEqual({
+          article_id: 7,
+          title: "Z",
+          topic: "mitch",
+          author: "icellusedkars",
+          body: "I was hungry.",
+          created_at: expect.any(String),
+          votes: 0,
+          comment_count: 0,
+        });
+      });
+  });
+  test("status:200, responds with array of articles objects, sorted by specified column", () => {
+    return request(app)
+      .get("/api/articles?sort_by=body")
+      .expect(200)
+      .then(({ body }) => {
+        const { articles } = body;
+        expect(articles).toBeInstanceOf(Array);
+        expect(articles.length).toBeGreaterThan(0);
+        expect(articles).toBeSortedBy("body", {
+          descending: true,
+          coerce: true,
+        });
+        expect(articles[0]).toEqual({
+          article_id: 10,
+          title: "Seven inspirational thought leaders from Manchester UK",
+          topic: "mitch",
+          author: "rogersop",
+          body: "Who are we kidding, there is only one, and it's Mitch!",
+          created_at: expect.any(String),
+          votes: 0,
+          comment_count: 0,
+        });
+      });
+  });
+  test("status:200, responds with array of articles objects, sorted by default created_at, in specified order", () => {
+    return request(app)
+      .get("/api/articles?order=ASC")
+      .expect(200)
+      .then(({ body }) => {
+        const { articles } = body;
+        expect(articles).toBeInstanceOf(Array);
+        expect(articles.length).toBeGreaterThan(0);
+        expect(articles).toBeSortedBy("created_at", {
+          descending: false,
+          coerce: true,
+        });
+        expect(articles[0]).toEqual({
+          article_id: 7,
+          title: "Z",
+          topic: "mitch",
+          author: "icellusedkars",
+          body: "I was hungry.",
+          created_at: expect.any(String),
+          votes: 0,
+          comment_count: 0,
+        });
+      });
+  });
+  test("status:200, responds with array of articles objects, filtered by specified topic", () => {
+    return request(app)
+      .get("/api/articles?topic=cats")
+      .expect(200)
+      .then(({ body }) => {
+        const { articles } = body;
+        expect(articles).toBeInstanceOf(Array);
+        expect(articles.length).toEqual(1);
+        expect(articles[0]).toEqual({
+          article_id: 5,
+          title: "UNCOVERED: catspiracy to bring down democracy",
+          topic: "cats",
+          author: "rogersop",
+          body: "Bastet walks amongst us, and the cats are taking arms!",
+          created_at: expect.any(String),
+          votes: 0,
+          comment_count: 2,
+        });
+      });
+  });
+  test("status:200, responds with array of articles objects, sorted by specified column, in specified order, filtered by specified topic", () => {
+    return request(app)
+      .get("/api/articles?sort_by=title&order=ASC&topic=mitch")
+      .expect(200)
+      .then(({ body }) => {
+        const { articles } = body;
+        expect(articles).toBeInstanceOf(Array);
+        expect(articles.length).toBeGreaterThan(0);
+        expect(articles).toBeSortedBy("title", {
+          descending: false,
+          coerce: true,
+        });
+        expect(articles[0]).toEqual({
+          article_id: 6,
+          title: "A",
+          topic: "mitch",
+          author: "icellusedkars",
+          body: "Delicious tin of cat food",
+          created_at: expect.any(String),
+          votes: 0,
+          comment_count: 1,
+        });
+      });
+  });
+
+  test("status:400, gives correct error when query is invalid sort_by", () => {
+    return request(app)
+      .get("/api/articles?sort_by=fish")
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe("Bad Request");
+      });
+  });
+  test("status:400, gives correct error when query is invalid order", () => {
+    return request(app)
+      .get("/api/articles?order=fish")
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe("Bad Request");
+      });
+  });
+  test("status:400, gives correct error when query is invalid filter topic", () => {
+    return request(app)
+      .get("/api/articles?topic=fish")
+      .expect(404)
+      .then((response) => {
+        expect(response.body.msg).toBe("topic not found");
+      });
+  });
+  test("status:400, gives correct error when sort query is mis-spelled", () => {
+    return request(app)
+      .get("/api/articles?sortby=title")
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe("Bad Request");
+      });
+  });
+  test("status:400, gives correct error when order query is mis-spelled", () => {
+    return request(app)
+      .get("/api/articles?orde=ASC")
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe("Bad Request");
+      });
+  });
+  test("status:400, gives correct error when filter query is mis-spelled", () => {
+    return request(app)
+      .get("/api/articles?topi=mitch")
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe("Bad Request");
+      });
+  });
+});
+
 describe("GET /api/articles/:article_id", () => {
   test("status:200, should return an article object with correct properties", () => {
     return request(app)
