@@ -28,6 +28,21 @@ describe("ALL - invalid routes", () => {
   });
 });
 
+describe("GET /api", () => {
+  test("status:200, should respond with JSON desribing api endpoints", () => {
+    return request(app)
+      .get("/api")
+      .expect(200)
+      .then(({ body }) => {
+        const { endpoints } = body;
+        expect(endpoints["GET /api"]).toEqual({
+          description:
+            "serves up a json representation of all the available endpoints of the api",
+        });
+      });
+  });
+});
+
 ///////////////////////////////////////////
 
 //TOPICS tests
