@@ -4,14 +4,18 @@ const {
   updateArticleById,
   selectCommentsByArticleId,
   newCommentByArticleId,
+  newArticle,
 } = require("../models/articles.models");
 
 exports.getArticles = (req, res, next) => {
   const sortBy = req.query.sort_by;
   const order = req.query.order;
   const topicFilter = req.query.topic;
+  const limit = req.query.limit;
 
-  const validQueries = ["sort_by", "order", "topic"];
+  //added limit to req.query, validQuery check
+
+  const validQueries = ["sort_by", "order", "topic", "limit"];
   if (Object.keys(req.query).length != 0) {
     for (query in req.query) {
       if (!validQueries.includes(query)) {
@@ -19,7 +23,7 @@ exports.getArticles = (req, res, next) => {
       }
     }
   }
-  selectArticles(sortBy, order, topicFilter)
+  selectArticles(sortBy, order, topicFilter, limit)
     .then((articles) => res.status(200).send({ articles }))
     .catch(next);
 };
@@ -66,5 +70,33 @@ exports.postCommentByArticleId = (req, res, next) => {
 
   newCommentByArticleId(articleId, newCommentUsername, newCommentBody)
     .then((comment) => res.status(201).send({ comment }))
+    .catch(next);
+};
+
+exports.postArticle = (req, res, next) => {
+  const newArticleAuthor = req.body.author;
+  const newArticleTitle = req.body.title;
+  const newArticleBody = req.body.body;
+  const newArticleTopic = req.body.topic;
+  if (
+    !req.body.hasOwnProperty("author") ||
+    !req.body.hasOwnProperty("title") ||
+    !req.body.hasOwnProperty("body") ||
+    !req.body.hasOwnProperty("topic")
+  ) {
+    res.status(400).send({ msg: "Invalid post body keys" });
+  }
+
+  if (
+    typeof newArticleAuthor !== "string" ||
+    typeof newArticleTitle !== "string" ||
+    typeof newArticleBody !== "string" ||
+    typeof newArticleTopic !== "string"
+  ) {
+    res.status(400).send({ msg: "Invalid post body values" });
+  }
+
+  newArticle(newArticleAuthor, newArticleTitle, newArticleBody, newArticleTopic)
+    .then((article) => res.status(201).send({ article }))
     .catch(next);
 };

@@ -308,6 +308,107 @@ describe("GET /api/articles (queries)", () => {
   });
 });
 
+describe("POST /api/articles", () => {
+  test("status:201, adds new article and returns added article", () => {
+    const newArticle = {
+      author: "rogersop",
+      title: "This is a test title",
+      body: "This is a test body",
+      topic: "mitch",
+    };
+    return request(app)
+      .post("/api/articles")
+      .send(newArticle)
+      .expect(201)
+      .then(({ body }) => {
+        const { article } = body;
+        expect(article).toEqual({
+          author: "rogersop",
+          title: "This is a test title",
+          body: "This is a test body",
+          topic: "mitch",
+          article_id: 13,
+          votes: 0,
+          created_at: expect.any(String),
+          comment_count: 0,
+        });
+      });
+  });
+  test("status:404, gives correct error message when given valid but nonexistent username", () => {
+    const newArticle = {
+      author: "fish",
+      title: "This is a test title",
+      body: "This is a test body",
+      topic: "mitch",
+    };
+    return request(app)
+      .post("/api/articles")
+      .send(newArticle)
+      .expect(404)
+      .then((response) => {
+        expect(response.body.msg).toBe("username not found");
+      });
+  });
+  test("status:404, gives correct error message when given valid but nonexistent topic", () => {
+    const newArticle = {
+      author: "rogersop",
+      title: "This is a test title",
+      body: "This is a test body",
+      topic: "fish",
+    };
+    return request(app)
+      .post("/api/articles")
+      .send(newArticle)
+      .expect(404)
+      .then((response) => {
+        expect(response.body.msg).toBe("slug not found");
+      });
+  });
+  test("status:400, gives correct error when body passed does not contain correct properties", () => {
+    const newArticle = {
+      body: "This is a test body",
+      topic: "mitch",
+    };
+    return request(app)
+      .post("/api/articles")
+      .send(newArticle)
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe("Invalid post body keys");
+      });
+  });
+  test("status:400, gives correct error when body passed contains mis-spelled properties", () => {
+    const newArticle = {
+      autho: "rogersop",
+      title: "This is a test title",
+      body: "This is a test body",
+      topic: "mitch",
+    };
+    return request(app)
+      .post("/api/articles")
+      .send(newArticle)
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe("Invalid post body keys");
+      });
+  });
+  test("status:400, gives correct error when body passed does not contain correct properties", () => {
+    const newArticle = {
+      author: "rogersop",
+      title: null,
+      body: "This is a test body",
+      topic: "mitch",
+    };
+    return request(app)
+      .post("/api/articles")
+      .send(newArticle)
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe("Invalid post body values");
+      });
+  });
+});
+
 describe("GET /api/articles/:article_id", () => {
   test("status:200, should return an article object with correct properties", () => {
     return request(app)
@@ -583,6 +684,32 @@ describe("GET /api/users", () => {
   });
 });
 
+describe("GET /api/users/:username", () => {
+  test("status:200, should respond with user object", () => {
+    return request(app)
+      .get("/api/users/icellusedkars")
+      .expect(200)
+      .then(({ body }) => {
+        const { user } = body;
+        expect(user).toBeInstanceOf(Object);
+        expect(user).toEqual({
+          username: "icellusedkars",
+          name: "sam",
+          avatar_url:
+            "https://avatars2.githubusercontent.com/u/24604688?s=460&v=4",
+        });
+      });
+  });
+  test("status:404, gives correct error message when given valid but nonexistent username", () => {
+    return request(app)
+      .get("/api/users/fish")
+      .expect(404)
+      .then((response) => {
+        expect(response.body.msg).toBe("username not found");
+      });
+  });
+});
+
 ///////////////////////////////////////////
 
 //COMMENTS tests
@@ -607,6 +734,60 @@ describe("DELETE /api/comments/:comment_id", () => {
       .expect(400)
       .then((response) => {
         expect(response.body.msg).toBe("Invalid Request");
+      });
+  });
+});
+
+describe("PATCH /api/comments/:comment_id", () => {
+  test("status:200, updates correct comment and returns updated comment object, for incrementing vote", () => {
+    const commentUpdate = {
+      inc_votes: 10,
+    };
+    return request(app)
+      .patch("/api/comments/1")
+      .send(commentUpdate)
+      .expect(200)
+      .then(({ body }) => {
+        const { comment } = body;
+        expect(comment).toBeInstanceOf(Object);
+        expect(comment.votes).toEqual(26);
+      });
+  });
+  test("status:200, updates correct comment and returns updated comment object, for decrementing vote", () => {
+    const commentUpdate = {
+      inc_votes: -10,
+    };
+    return request(app)
+      .patch("/api/comments/2")
+      .send(commentUpdate)
+      .expect(200)
+      .then(({ body }) => {
+        const { comment } = body;
+        expect(comment).toBeInstanceOf(Object);
+        expect(comment.votes).toEqual(4);
+      });
+  });
+  test("status:400, gives correct error message when given invalid votes increment", () => {
+    const commentUpdate = { inc_votes: "fish" };
+    return request(app)
+      .patch("/api/comments/3")
+      .send(commentUpdate)
+      .expect(400)
+      .then((response) => {
+        expect(response.body.msg).toBe("Invalid Request");
+      });
+  });
+
+  test("status:404, gives correct error message when given valid but nonexistent comment id", () => {
+    const commentUpdate = {
+      inc_votes: -50,
+    };
+    return request(app)
+      .patch("/api/comments/9999")
+      .send(commentUpdate)
+      .expect(404)
+      .then((response) => {
+        expect(response.body.msg).toBe("comment_id not found");
       });
   });
 });

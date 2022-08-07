@@ -10,11 +10,18 @@ const {
   patchArticleById,
   getCommentsByArticleId,
   postCommentByArticleId,
+  postArticle,
 } = require("./controllers/articles.controllers");
 
-const { getUsers } = require("./controllers/users.controllers");
+const {
+  getUsers,
+  getUserByUsername,
+} = require("./controllers/users.controllers");
 
-const { deleteCommentById } = require("./controllers/comments.controllers");
+const {
+  deleteCommentById,
+  patchCommentById,
+} = require("./controllers/comments.controllers");
 
 const app = express();
 app.use(express.json());
@@ -22,16 +29,19 @@ app.use(express.json());
 app.get("/api", getApi);
 
 app.get("/api/users", getUsers);
+app.get("/api/users/:username", getUserByUsername);
 
 app.get("/api/topics", getTopics);
 
 app.delete("/api/comments/:comment_id", deleteCommentById);
+app.patch("/api/comments/:comment_id", patchCommentById);
 
 app.get("/api/articles", getArticles);
 app.get("/api/articles/:article_id", getArticleById);
 app.patch("/api/articles/:article_id", patchArticleById);
 app.get("/api/articles/:article_id/comments", getCommentsByArticleId);
 app.post("/api/articles/:article_id/comments", postCommentByArticleId);
+app.post("/api/articles", postArticle);
 
 app.all("*", (req, res) => {
   res.status(404).send({ msg: "Invalid route" });

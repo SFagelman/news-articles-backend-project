@@ -5,8 +5,11 @@ const { checkExists } = require("../db/seeds/utils");
 exports.selectArticles = (
   sortBy = "created_at",
   order = "DESC",
-  topicFilter
+  topicFilter,
+  limit = 10
 ) => {
+  //added limit + default of 10 to parameters
+
   const validSortBys = [
     "title",
     "topic",
@@ -91,5 +94,27 @@ exports.newCommentByArticleId = (
       .then((article) => {
         return article.rows[0];
       });
+  });
+};
+
+exports.newArticle = (
+  newArticleAuthor,
+  newArticleTitle,
+  newArticleBody,
+  newArticleTopic
+) => {
+  return checkExists("users", "username", newArticleAuthor).then(() => {
+    return checkExists("topics", "slug", newArticleTopic).then(() => {
+      return db
+        .query(
+          "INSERT INTO articles (author, title, body, topic) VALUES ($1, $2, $3, $4) RETURNING *;",
+          [newArticleAuthor, newArticleTitle, newArticleBody, newArticleTopic]
+        )
+        .then((article) => {
+          article.rows[0].comment_count = 0;
+          console.log(article.rows[0]);
+          return article.rows[0];
+        });
+    });
   });
 };

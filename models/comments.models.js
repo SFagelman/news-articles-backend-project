@@ -12,3 +12,16 @@ exports.removeCommentById = (commentId) => {
       });
   });
 };
+
+exports.updateCommentById = (commentId, newVotes) => {
+  return checkExists("comments", "comment_id", commentId).then(() => {
+    return db
+      .query(
+        "UPDATE comments SET votes = votes + $1 WHERE comment_id = $2 RETURNING *;",
+        [newVotes, commentId]
+      )
+      .then((comment) => {
+        return comment.rows[0];
+      });
+  });
+};
