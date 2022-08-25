@@ -71,7 +71,7 @@ exports.selectCommentsByArticleId = (articleId) => {
   return checkExists("articles", "article_id", articleId)
     .then(() => {
       return db.query(
-        "SELECT comments.comment_id, comments.votes, comments.created_at, comments.author, comments.body FROM comments JOIN articles ON comments.article_id = articles.article_id WHERE articles.article_id = $1",
+        "SELECT comments.comment_id, comments.votes, comments.created_at, comments.author, comments.body FROM comments JOIN articles ON comments.article_id = articles.article_id WHERE articles.article_id = $1 ORDER BY comments.created_at DESC",
         [articleId]
       );
     })
