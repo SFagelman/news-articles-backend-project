@@ -112,7 +112,6 @@ exports.newArticle = (
         )
         .then((article) => {
           article.rows[0].comment_count = 0;
-          console.log(article.rows[0]);
           return article.rows[0];
         });
     });
